@@ -31,15 +31,11 @@ type Plano = {
 export default function PlanosAdminPage() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [planos, setPlanos] = useState<Plano[]>([]);
-
   const [alunoId, setAlunoId] = useState("");
   const [plano, setPlano] = useState("");
 
   function calcularVencimento(nomePlano: string) {
-    const planoSelecionado = opcoesPlanos.find(
-      (item) => item.nome === nomePlano
-    );
-
+    const planoSelecionado = opcoesPlanos.find((item) => item.nome === nomePlano);
     if (!planoSelecionado) return "";
 
     const data = new Date();
@@ -51,7 +47,7 @@ export default function PlanosAdminPage() {
   async function buscarDados() {
     const { data: alunosData } = await supabase
       .from("alunos")
-      .select("*")
+      .select("id, nome, aluno_id")
       .order("nome");
 
     const { data: planosData } = await supabase
@@ -63,14 +59,9 @@ export default function PlanosAdminPage() {
     setPlanos(planosData || []);
   }
 
-  async function ativarPrimeiraMensalidade() {
-    const aluno = alunos.find(
-      (item) => item.aluno_id === alunoId
-    );
-
-    const planoSelecionado = opcoesPlanos.find(
-      (p) => p.nome === plano
-    );
+  async function ativarMensalidadeFisica() {
+    const aluno = alunos.find((item) => item.aluno_id === alunoId);
+    const planoSelecionado = opcoesPlanos.find((item) => item.nome === plano);
 
     if (!aluno || !planoSelecionado) {
       alert("Selecione o aluno e o plano.");
@@ -79,39 +70,32 @@ export default function PlanosAdminPage() {
 
     const vencimento = calcularVencimento(planoSelecionado.nome);
 
-    const { error } = await supabase
-      .from("planos")
-      .insert({
-        aluno: aluno.nome,
-        aluno_id: aluno.aluno_id,
-        plano: planoSelecionado.nome,
-        valor: planoSelecionado.valor,
-        vencimento,
-        status: "Ativo",
-        primeira_mensalidade: true,
-      });
+    const { error } = await supabase.from("planos").insert({
+      aluno: aluno.nome,
+      aluno_id: aluno.aluno_id,
+      plano: planoSelecionado.nome,
+      valor: planoSelecionado.valor,
+      vencimento,
+      status: "Ativo",
+      primeira_mensalidade: true,
+    });
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    alert(`Primeira mensalidade ativada! Vence em ${vencimento}`);
+    alert(`Mensalidade física ativada para ${aluno.nome}.`);
 
     setAlunoId("");
     setPlano("");
-
     buscarDados();
   }
 
   async function excluirPlano(id: number) {
-    const confirmar = confirm("Deseja excluir este plano?");
-    if (!confirmar) return;
+    if (!confirm("Deseja excluir este plano?")) return;
 
-    const { error } = await supabase
-      .from("planos")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("planos").delete().eq("id", id);
 
     if (error) {
       alert(error.message);
@@ -120,6 +104,10 @@ export default function PlanosAdminPage() {
 
     buscarDados();
   }
+
+  useEffect(() => {
+    buscarDados();
+  }, []);
 
   const vencimentoPreview = calcularVencimento(plano);
 
@@ -131,47 +119,39 @@ export default function PlanosAdminPage() {
         <div>
           <h1 className="text-4xl font-black">Planos</h1>
           <p className="text-gray-400 mt-1">
-            Primeira mensalidade presencial.
+            Ative mensalidade física pelo nome e ID do aluno.
           </p>
         </div>
       </div>
 
       <section className="mt-10 space-y-5 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-        <div>
-          <label className="text-sm text-gray-400">Aluno</label>
+        <select
+          value={alunoId}
+          onChange={(e) => setAlunoId(e.target.value)}
+          className="w-full bg-black border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
+        >
+          <option value="">Selecione o aluno</option>
 
-          <select
-            value={alunoId}
-            onChange={(e) => setAlunoId(e.target.value)}
-            className="w-full mt-2 bg-black border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-          >
-            <option value="">Selecione</option>
+          {alunos.map((aluno) => (
+            <option key={aluno.id} value={aluno.aluno_id}>
+              {aluno.nome} • ID {aluno.aluno_id}
+            </option>
+          ))}
+        </select>
 
-            {alunos.map((aluno) => (
-              <option key={aluno.id} value={aluno.aluno_id}>
-                {aluno.nome} • ID {aluno.aluno_id}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={plano}
+          onChange={(e) => setPlano(e.target.value)}
+          className="w-full bg-black border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
+        >
+          <option value="">Selecione o plano</option>
 
-        <div>
-          <label className="text-sm text-gray-400">Plano</label>
-
-          <select
-            value={plano}
-            onChange={(e) => setPlano(e.target.value)}
-            className="w-full mt-2 bg-black border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-          >
-            <option value="">Selecione</option>
-
-            {opcoesPlanos.map((p) => (
-              <option key={p.nome} value={p.nome}>
-                {p.nome} - R$ {p.valor}
-              </option>
-            ))}
-          </select>
-        </div>
+          {opcoesPlanos.map((item) => (
+            <option key={item.nome} value={item.nome}>
+              {item.nome} - R$ {item.valor}
+            </option>
+          ))}
+        </select>
 
         {vencimentoPreview && (
           <div className="bg-black border border-green-500/40 rounded-2xl p-4">
@@ -183,10 +163,10 @@ export default function PlanosAdminPage() {
         )}
 
         <button
-          onClick={ativarPrimeiraMensalidade}
+          onClick={ativarMensalidadeFisica}
           className="w-full bg-green-500 hover:bg-green-400 transition text-black font-black rounded-2xl p-4"
         >
-          Ativar primeira mensalidade
+          Ativar mensalidade física
         </button>
       </section>
 
@@ -205,18 +185,12 @@ export default function PlanosAdminPage() {
               </div>
 
               <p className="text-gray-400 mt-3">{item.plano}</p>
-
-              <p className="text-green-500 font-bold mt-2">
-                R$ {item.valor}
-              </p>
-
-              <p className="text-gray-500 mt-2">
-                Vence: {item.vencimento}
-              </p>
+              <p className="text-green-500 font-bold mt-2">R$ {item.valor}</p>
+              <p className="text-gray-500 mt-2">Vence: {item.vencimento}</p>
 
               {item.primeira_mensalidade && (
                 <p className="text-yellow-500 font-bold mt-2">
-                  Primeira mensalidade presencial
+                  Pagamento físico/presencial
                 </p>
               )}
             </div>

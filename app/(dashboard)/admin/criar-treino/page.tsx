@@ -60,44 +60,14 @@ const fichaCompleta = [
 ];
 
 const exerciciosPorGrupo: Record<string, string[]> = {
-  Peito: [
-    "Supino reto - 4x10",
-    "Supino inclinado - 3x12",
-    "Crucifixo - 3x12",
-  ],
-  Costas: [
-    "Puxada frente - 4x10",
-    "Remada baixa - 4x10",
-    "Remada unilateral - 3x12",
-  ],
-  Pernas: [
-    "Agachamento livre - 4x10",
-    "Leg press - 4x12",
-    "Cadeira extensora - 3x12",
-    "Mesa flexora - 3x12",
-    "Panturrilha - 4x15",
-  ],
-  Ombro: [
-    "Desenvolvimento - 4x10",
-    "Elevação lateral - 3x12",
-    "Elevação frontal - 3x12",
-  ],
-  Bíceps: [
-    "Rosca direta - 4x10",
-    "Rosca alternada - 3x12",
-  ],
-  Tríceps: [
-    "Tríceps corda - 4x10",
-    "Tríceps testa - 3x12",
-  ],
-  Abdômen: [
-    "Abdominal supra - 4x20",
-    "Prancha - 3x40s",
-  ],
-  Cardio: [
-    "Esteira - 20min",
-    "Bike - 15min",
-  ],
+  Peito: ["Supino reto - 4x10", "Supino inclinado - 3x12", "Crucifixo - 3x12"],
+  Costas: ["Puxada frente - 4x10", "Remada baixa - 4x10", "Remada unilateral - 3x12"],
+  Pernas: ["Agachamento livre - 4x10", "Leg press - 4x12", "Cadeira extensora - 3x12", "Mesa flexora - 3x12", "Panturrilha - 4x15"],
+  Ombro: ["Desenvolvimento - 4x10", "Elevação lateral - 3x12", "Elevação frontal - 3x12"],
+  Bíceps: ["Rosca direta - 4x10", "Rosca alternada - 3x12"],
+  Tríceps: ["Tríceps corda - 4x10", "Tríceps testa - 3x12"],
+  Abdômen: ["Abdominal supra - 4x20", "Prancha - 3x40s"],
+  Cardio: ["Esteira - 20min", "Bike - 15min"],
 };
 
 type Aluno = {
@@ -110,10 +80,8 @@ export default function CriarTreinoPage() {
   const [modo, setModo] = useState<"dia" | "semana">("semana");
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [alunoId, setAlunoId] = useState("");
-
   const [diasSelecionados, setDiasSelecionados] = useState<string[]>([]);
   const [dataInicio, setDataInicio] = useState("");
-
   const [diaSemana, setDiaSemana] = useState("");
   const [dataTreino, setDataTreino] = useState("");
   const [treinoEscolhido, setTreinoEscolhido] = useState("");
@@ -142,9 +110,7 @@ export default function CriarTreinoPage() {
 
   function alternarDia(dia: string) {
     if (diasSelecionados.includes(dia)) {
-      setDiasSelecionados(
-        diasSelecionados.filter((item) => item !== dia)
-      );
+      setDiasSelecionados(diasSelecionados.filter((item) => item !== dia));
       return;
     }
 
@@ -187,6 +153,7 @@ export default function CriarTreinoPage() {
       aluno_id: alunoCodigo,
       titulo,
       mensagem,
+      visualizada: false,
     });
   }
 
@@ -202,9 +169,7 @@ export default function CriarTreinoPage() {
 
     const treinosSemana = divisao.map((grupos, index) => {
       const exercicios = grupos
-        .map((grupo) => {
-          return `${grupo}\n${exerciciosPorGrupo[grupo].join("\n")}`;
-        })
+        .map((grupo) => `${grupo}\n${exerciciosPorGrupo[grupo].join("\n")}`)
         .join("\n\n");
 
       return {
@@ -217,9 +182,7 @@ export default function CriarTreinoPage() {
       };
     });
 
-    const { error } = await supabase
-      .from("treinos")
-      .insert(treinosSemana);
+    const { error } = await supabase.from("treinos").insert(treinosSemana);
 
     if (error) {
       alert(error.message);
@@ -243,9 +206,7 @@ export default function CriarTreinoPage() {
   async function enviarTreinoDia() {
     const aluno = pegarAlunoSelecionado();
 
-    const treino = treinosProntos.find(
-      (item) => item.nome === treinoEscolhido
-    );
+    const treino = treinosProntos.find((item) => item.nome === treinoEscolhido);
 
     if (!aluno || !diaSemana || !dataTreino || !treino) {
       alert("Selecione aluno, dia, data e treino.");
@@ -282,9 +243,7 @@ export default function CriarTreinoPage() {
   }
 
   const previewSemana =
-    modo === "semana" && diasSelecionados.length > 0
-      ? dividirFichaPorDias()
-      : [];
+    modo === "semana" && diasSelecionados.length > 0 ? dividirFichaPorDias() : [];
 
   const treinoPreview = treinosProntos.find(
     (item) => item.nome === treinoEscolhido
@@ -404,9 +363,7 @@ export default function CriarTreinoPage() {
                       key={index}
                       className="bg-black border border-zinc-800 rounded-2xl p-4"
                     >
-                      <p className="font-black">
-                        {diasSelecionados[index]}
-                      </p>
+                      <p className="font-black">{diasSelecionados[index]}</p>
 
                       <p className="text-gray-400 mt-1">
                         {grupos.join(" + ")}
@@ -429,9 +386,7 @@ export default function CriarTreinoPage() {
         {modo === "dia" && (
           <>
             <div>
-              <label className="text-sm text-gray-400">
-                Dia da semana
-              </label>
+              <label className="text-sm text-gray-400">Dia da semana</label>
 
               <select
                 value={diaSemana}
@@ -449,9 +404,7 @@ export default function CriarTreinoPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-400">
-                Data do treino
-              </label>
+              <label className="text-sm text-gray-400">Data do treino</label>
 
               <input
                 type="date"
@@ -462,9 +415,7 @@ export default function CriarTreinoPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-400">
-                Treino pronto
-              </label>
+              <label className="text-sm text-gray-400">Treino pronto</label>
 
               <select
                 value={treinoEscolhido}

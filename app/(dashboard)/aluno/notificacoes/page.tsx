@@ -7,10 +7,11 @@ import {
 
 import {
   Bell,
-  CheckCheck,
+  CheckCircle,
 } from "lucide-react";
 
 import BottomNav from "@/components/BottomNav";
+
 import { supabase } from "@/lib/supabase";
 
 type Notificacao = {
@@ -29,71 +30,76 @@ export default function NotificacoesPage() {
     Notificacao[]
   >([]);
 
-  async function carregarNotificacoes() {
-    const { data: authData } =
+  async function carregar() {
+    const {
+      data: authData,
+    } =
       await supabase.auth.getUser();
 
-    const user = authData.user;
+    const user =
+      authData.user;
 
     if (!user?.email) return;
 
-    const { data: alunoData } =
-      await supabase
-        .from("alunos")
-        .select("*")
-        .eq("email", user.email)
-        .single();
+    const {
+      data: aluno,
+    } = await supabase
+      .from("alunos")
+      .select("*")
+      .eq(
+        "email",
+        user.email
+      )
+      .single();
 
-    if (!alunoData) return;
+    if (!aluno) return;
 
-    const { data } =
-      await supabase
-        .from(
-          "notificacoes"
-        )
-        .select("*")
-        .eq(
-          "aluno_id",
-          alunoData.aluno_id
-        )
-        .order("id", {
-          ascending: false,
-        });
+    const {
+      data,
+    } = await supabase
+      .from("notificacoes")
+      .select("*")
+      .eq(
+        "aluno_id",
+        aluno.aluno_id
+      )
+      .order("id", {
+        ascending: false,
+      });
 
-    setNotificacoes(data || []);
+    setNotificacoes(
+      data || []
+    );
 
     await supabase
-      .from(
-        "notificacoes"
-      )
+      .from("notificacoes")
       .update({
         visualizada: true,
       })
       .eq(
         "aluno_id",
-        alunoData.aluno_id
+        aluno.aluno_id
       );
   }
 
   useEffect(() => {
-    carregarNotificacoes();
+    carregar();
 
     const canal =
       supabase
         .channel(
-          "notificacoes-realtime"
+          "notificacoes"
         )
         .on(
           "postgres_changes",
           {
             event: "*",
-            schema: "public",
+            schema:
+              "public",
             table:
               "notificacoes",
           },
-          () => {
-            carregarNotificacoes();
-          }
+          () => carregar()
         )
         .subscribe();
 
@@ -109,19 +115,16 @@ export default function NotificacoesPage() {
 
       <div className="flex items-center gap-3">
 
-        <Bell
-          className="text-green-500"
-          size={32}
-        />
+        <Bell className="text-green-500" />
 
         <div>
 
           <h1 className="text-4xl font-black">
-            Avisos
+            Notificações
           </h1>
 
           <p className="text-gray-400 mt-1">
-            Notificações da academia.
+            Atualizações da academia
           </p>
 
         </div>
@@ -132,59 +135,57 @@ export default function NotificacoesPage() {
 
         {notificacoes.length ===
           0 && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-center text-gray-400">
-            Nenhuma notificação.
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center">
+
+            <Bell className="mx-auto text-green-500" size={40} />
+
+            <p className="mt-4 text-gray-400">
+              Nenhuma notificação.
+            </p>
+
           </div>
         )}
 
         {notificacoes.map(
-          (item) => (
+          (
+            notificacao
+          ) => (
             <div
-              key={item.id}
+              key={
+                notificacao.id
+              }
               className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
             >
 
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+
+                <CheckCircle className="text-green-500 shrink-0 mt-1" />
 
                 <div>
 
                   <h2 className="text-xl font-black">
                     {
-                      item.titulo
+                      notificacao.titulo
                     }
                   </h2>
 
-                  <p className="text-gray-300 mt-3">
+                  <p className="text-gray-400 mt-2">
                     {
-                      item.mensagem
+                      notificacao.mensagem
                     }
+                  </p>
+
+                  <p className="text-gray-500 text-sm mt-3">
+                    {new Date(
+                      notificacao.created_at
+                    ).toLocaleString(
+                      "pt-BR"
+                    )}
                   </p>
 
                 </div>
 
-                <CheckCheck className="text-green-500 shrink-0" />
-
               </div>
-
-              <p className="text-gray-500 text-sm mt-4">
-                {new Date(
-                  item.created_at
-                ).toLocaleDateString(
-                  "pt-BR"
-                )}{" "}
-                •{" "}
-                {new Date(
-                  item.created_at
-                ).toLocaleTimeString(
-                  "pt-BR",
-                  {
-                    hour:
-                      "2-digit",
-                    minute:
-                      "2-digit",
-                  }
-                )}
-              </p>
 
             </div>
           )

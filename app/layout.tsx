@@ -1,30 +1,19 @@
-import "./globals.css";
-
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Nexora Fitness",
-
-  description:
-    "Aplicativo da academia Nexora Fitness",
-
-  manifest: "/manifest.json",
-
-  themeColor: "#22c55e",
+  description: "Sistema inteligente para academias",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="pt-BR">
-
-      <body>
-        {children}
-      </body>
-
+      <body>{children}</body>
     </html>
   );
 }

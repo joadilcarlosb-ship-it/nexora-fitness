@@ -34,16 +34,17 @@ export default function LoginPage() {
 
     if (aluno?.tipo === "admin") {
       window.location.href = "/admin";
-    } else {
-      window.location.href = "/aluno";
+      return;
     }
+
+    window.location.href = "/aluno";
   }
 
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
       <section className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-[32px] p-6">
         <div className="flex items-center gap-3">
-          <Dumbbell className="text-green-500" size={36} />
+          <Dumbbell className="text-green-500" size={38} />
 
           <div>
             <h1 className="text-4xl font-black">Nexora</h1>

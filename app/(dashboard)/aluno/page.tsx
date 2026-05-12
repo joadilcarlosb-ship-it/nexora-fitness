@@ -27,6 +27,7 @@ export default function HomeAlunoPage() {
   const [notificacoes, setNotificacoes] = useState(0);
   const [presencas, setPresencas] = useState(0);
   const [mensagens, setMensagens] = useState(0);
+  const [streak, setStreak] = useState(0);
 
   const frases = [
     "Domingo também é dia de cuidar de você.",
@@ -55,6 +56,7 @@ export default function HomeAlunoPage() {
     if (!alunoData) return;
 
     setNome(alunoData.nome);
+    setStreak(alunoData.streak || 0);
 
     const dias = [
       "Domingo",
@@ -114,6 +116,11 @@ export default function HomeAlunoPage() {
         { event: "*", schema: "public", table: "mensagens" },
         () => carregarDados()
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "alunos" },
+        () => carregarDados()
+      )
       .subscribe();
 
     return () => {
@@ -135,9 +142,7 @@ export default function HomeAlunoPage() {
           {nome ? nome.split(" ")[0] : "Aluno"} 🔥
         </h1>
 
-        <p className="mt-4 font-semibold max-w-[320px]">
-          “{fraseDoDia}”
-        </p>
+        <p className="mt-4 font-semibold max-w-[320px]">“{fraseDoDia}”</p>
       </section>
 
       <section className="grid grid-cols-2 gap-4 mt-6">
@@ -153,9 +158,20 @@ export default function HomeAlunoPage() {
           <h2 className="text-3xl font-black mt-2">{notificacoes}</h2>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 col-span-2">
+        <div className="bg-zinc-900 border border-orange-500/30 rounded-3xl p-5">
+          <Flame className="text-orange-500" />
+          <p className="text-gray-400 mt-4">Sequência</p>
+          <h2 className="text-3xl font-black mt-2 text-orange-500">
+            {streak}
+          </h2>
+          <p className="text-orange-400 text-sm font-bold mt-1">
+            dia(s) seguido(s)
+          </p>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
           <MessageCircle className="text-green-500" />
-          <p className="text-gray-400 mt-4">Mensagens novas</p>
+          <p className="text-gray-400 mt-4">Mensagens</p>
           <h2 className="text-3xl font-black mt-2">{mensagens}</h2>
         </div>
       </section>
@@ -176,9 +192,7 @@ export default function HomeAlunoPage() {
                   {treinoHoje.nome_treino}
                 </h3>
 
-                <p className="text-gray-400 mt-2">
-                  {treinoHoje.dia_semana}
-                </p>
+                <p className="text-gray-400 mt-2">{treinoHoje.dia_semana}</p>
               </div>
 
               <Trophy className="text-green-500" size={34} />

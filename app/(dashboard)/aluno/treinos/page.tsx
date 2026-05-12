@@ -44,7 +44,6 @@ export default function TreinosPage() {
   const [treinosConcluidos, setTreinosConcluidos] = useState<number[]>([]);
   const [tempo, setTempo] = useState(60);
   const [rodando, setRodando] = useState(false);
-
   const [treinoIniciado, setTreinoIniciado] = useState<number | null>(null);
   const [inicioTreino, setInicioTreino] = useState<Date | null>(null);
 
@@ -95,7 +94,7 @@ export default function TreinosPage() {
   function comecarTreino(treinoId: number) {
     setTreinoIniciado(treinoId);
     setInicioTreino(new Date());
-    alert("Treino iniciado! Agora marque os exercícios.");
+    alert("Treino iniciado!");
   }
 
   function alternarExercicio(id: string) {
@@ -113,6 +112,38 @@ export default function TreinosPage() {
     setConcluidos(
       concluidos.filter((item) => !item.startsWith(`${treinoId}-`))
     );
+  }
+
+  async function atualizarStreak(alunoId: string) {
+    const hoje = new Date().toISOString().split("T")[0];
+
+    const ontem = new Date();
+    ontem.setDate(ontem.getDate() - 1);
+    const ontemFormatado = ontem.toISOString().split("T")[0];
+
+    const { data: alunoData } = await supabase
+      .from("alunos")
+      .select("*")
+      .eq("aluno_id", alunoId)
+      .single();
+
+    let novaStreak = 1;
+
+    if (alunoData?.ultimo_treino === ontemFormatado) {
+      novaStreak = (alunoData.streak || 0) + 1;
+    }
+
+    if (alunoData?.ultimo_treino === hoje) {
+      novaStreak = alunoData.streak || 1;
+    }
+
+    await supabase
+      .from("alunos")
+      .update({
+        streak: novaStreak,
+        ultimo_treino: hoje,
+      })
+      .eq("aluno_id", alunoId);
   }
 
   async function finalizarTreino(treino: Treino) {
@@ -162,11 +193,13 @@ export default function TreinosPage() {
       treino: treino.nome_treino,
     });
 
+    await atualizarStreak(treino.aluno_id);
+
     await supabase.from("notificacoes").insert({
       aluno: treino.aluno,
       aluno_id: treino.aluno_id,
       titulo: "Treino concluído ✅",
-      mensagem: `Parabéns! Você concluiu o treino "${treino.nome_treino}" em ${duracaoMinutos} minuto(s).`,
+      mensagem: `Parabéns! Você concluiu "${treino.nome_treino}" em ${duracaoMinutos} minuto(s).`,
     });
 
     alert(`Treino finalizado! Duração: ${duracaoMinutos} minuto(s).`);
@@ -205,7 +238,6 @@ export default function TreinosPage() {
       <main className="min-h-screen bg-black text-white p-6 pb-28 flex items-center justify-center">
         <section className="bg-zinc-900 border border-red-500/30 rounded-3xl p-6 text-center max-w-md">
           <Lock className="text-red-500 mx-auto" size={48} />
-
           <h1 className="text-3xl font-black mt-4">Acesso limitado</h1>
 
           <p className="text-gray-400 mt-3">
@@ -260,9 +292,7 @@ export default function TreinosPage() {
         {treinosVisiveis.length === 0 && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center">
             <Trophy className="text-green-500 mx-auto" size={48} />
-
             <h2 className="text-2xl font-black mt-4">Tudo concluído!</h2>
-
             <p className="text-gray-400 mt-2">
               Nenhum treino pendente no momento.
             </p>
@@ -277,6 +307,7 @@ export default function TreinosPage() {
           ).length;
 
           const todosFeitos = totalFeitos === exercicios.length;
+
           const progresso =
             exercicios.length > 0
               ? Math.round((totalFeitos / exercicios.length) * 100)

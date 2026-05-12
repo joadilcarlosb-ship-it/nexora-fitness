@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nexora Fitness</string>
+    <string name="title_activity_main">Nexora Fitness</string>
+    <string name="package_name">com.nexora.fitness</string>
+    <string name="custom_url_scheme">com.nexora.fitness</string>
+</resources>

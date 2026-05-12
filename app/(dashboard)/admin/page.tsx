@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+  Menu,
+  X,
   Users,
   Dumbbell,
   Wallet,
@@ -30,123 +32,53 @@ type Presenca = {
 };
 
 export default function AdminPage() {
-  const [alunosAtivos, setAlunosAtivos] =
-    useState(0);
+  const [menuAberto, setMenuAberto] = useState(false);
 
-  const [
-    treinosCadastrados,
-    setTreinosCadastrados,
-  ] = useState(0);
-
-  const [receitaTotal, setReceitaTotal] =
-    useState(0);
-
-  const [
-    receitaOnline,
-    setReceitaOnline,
-  ] = useState(0);
-
-  const [
-    pagamentosAtrasados,
-    setPagamentosAtrasados,
-  ] = useState(0);
-
-  const [
-    presencasHoje,
-    setPresencasHoje,
-  ] = useState<Presenca[]>([]);
+  const [alunosAtivos, setAlunosAtivos] = useState(0);
+  const [treinosCadastrados, setTreinosCadastrados] = useState(0);
+  const [receitaTotal, setReceitaTotal] = useState(0);
+  const [receitaOnline, setReceitaOnline] = useState(0);
+  const [pagamentosAtrasados, setPagamentosAtrasados] = useState(0);
+  const [presencasHoje, setPresencasHoje] = useState<Presenca[]>([]);
 
   async function carregarDados() {
-    const hoje =
-      new Date()
-        .toISOString()
-        .split("T")[0];
+    const hoje = new Date().toISOString().split("T")[0];
 
-    const {
-      count: totalAlunos,
-    } = await supabase
+    const { count: totalAlunos } = await supabase
       .from("alunos")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
+      .select("*", { count: "exact", head: true });
 
-    const {
-      count: totalTreinos,
-    } = await supabase
+    const { count: totalTreinos } = await supabase
       .from("treinos")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
+      .select("*", { count: "exact", head: true });
 
-    const { data: planos } =
-      await supabase
-        .from("planos")
-        .select("*");
+    const { data: planos } = await supabase.from("planos").select("*");
+    const { data: pagamentos } = await supabase.from("pagamentos").select("*");
 
-    const { data: pagamentos } =
-      await supabase
-        .from("pagamentos")
-        .select("*");
-
-    const {
-      data: presencas,
-    } = await supabase
+    const { data: presencas } = await supabase
       .from("presencas")
       .select("*")
       .eq("data", hoje)
-      .order("id", {
-        ascending: false,
-      });
+      .order("id", { ascending: false });
 
     const presencial =
       planos
-        ?.filter(
-          (item) =>
-            item.primeira_mensalidade
-        )
-        .reduce(
-          (acc, item) =>
-            acc + Number(item.valor),
-          0
-        ) || 0;
+        ?.filter((item) => item.primeira_mensalidade)
+        .reduce((acc, item) => acc + Number(item.valor), 0) || 0;
 
     const online =
-      pagamentos?.reduce(
-        (acc, item) =>
-          acc + Number(item.valor),
-        0
-      ) || 0;
+      pagamentos?.reduce((acc, item) => acc + Number(item.valor), 0) || 0;
 
     const atrasados =
-      planos?.filter(
-        (item) =>
-          new Date(item.vencimento) <
-          new Date()
-      ).length || 0;
+      planos?.filter((item) => new Date(item.vencimento) < new Date()).length ||
+      0;
 
-    setAlunosAtivos(
-      totalAlunos || 0
-    );
-
-    setTreinosCadastrados(
-      totalTreinos || 0
-    );
-
-    setReceitaTotal(
-      presencial + online
-    );
-
+    setAlunosAtivos(totalAlunos || 0);
+    setTreinosCadastrados(totalTreinos || 0);
+    setReceitaTotal(presencial + online);
     setReceitaOnline(online);
-
-    setPagamentosAtrasados(
-      atrasados
-    );
-
-    setPresencasHoje(
-      presencas || []
-    );
+    setPagamentosAtrasados(atrasados);
+    setPresencasHoje(presencas || []);
   }
 
   useEffect(() => {
@@ -160,35 +92,30 @@ export default function AdminPage() {
       icon: Users,
       color: "text-green-500",
     },
-
     {
       title: "Presenças hoje",
       value: presencasHoje.length,
       icon: CalendarCheck,
       color: "text-green-500",
     },
-
     {
       title: "Receita total",
       value: `R$ ${receitaTotal}`,
       icon: Wallet,
       color: "text-green-500",
     },
-
     {
       title: "Receita online",
       value: `R$ ${receitaOnline}`,
       icon: Wallet,
       color: "text-green-500",
     },
-
     {
       title: "Pagamentos atrasados",
       value: pagamentosAtrasados,
       icon: AlertTriangle,
       color: "text-yellow-500",
     },
-
     {
       title: "Treinos cadastrados",
       value: treinosCadastrados,
@@ -204,77 +131,66 @@ export default function AdminPage() {
       icon: UserPlus,
       destaque: true,
     },
-
     {
       title: "Ver alunos",
       href: "/admin/alunos",
       icon: Users,
       destaque: false,
     },
-
     {
       title: "Criar treino",
       href: "/admin/criar-treino",
       icon: Dumbbell,
       destaque: false,
     },
-
     {
       title: "Ver treinos",
       href: "/admin/ver-treinos",
       icon: Dumbbell,
       destaque: false,
     },
-
     {
       title: "Treinos concluídos",
       href: "/admin/treinos-concluidos",
       icon: CheckCircle,
       destaque: false,
     },
-
     {
       title: "Presenças",
       href: "/admin/presencas",
       icon: CalendarCheck,
       destaque: false,
     },
-
     {
       title: "Ranking",
       href: "/admin/ranking",
       icon: Trophy,
       destaque: false,
     },
-
     {
       title: "Evolução física",
       href: "/admin/evolucao",
       icon: ChartColumn,
       destaque: false,
     },
-
     {
       title: "Antes e Depois",
       href: "/admin/evolucao/fotos",
       icon: Camera,
       destaque: false,
     },
-
     {
       title: "Chat alunos",
       href: "/admin/chat",
       icon: MessageCircle,
       destaque: false,
     },
-
     {
       title: "Planos",
       href: "/admin/planos",
       icon: Crown,
       destaque: false,
     },
-
     {
       title: "Financeiro",
       href: "/admin/financeiro",
@@ -284,141 +200,156 @@ export default function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-black text-white p-6">
-
-      <h1 className="text-4xl font-black">
-        Painel Admin
-      </h1>
-
-      <p className="text-gray-400 mt-2">
-        Controle geral da Nexora Fitness.
-      </p>
-
-      <section className="grid gap-4 mt-8">
-
-        {cards.map((card) => {
-          const Icon = card.icon;
-
-          return (
-            <div
-              key={card.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
-            >
-
-              <Icon className={card.color} />
-
-              <p className="text-gray-400 mt-4">
-                {card.title}
-              </p>
-
-              <h2 className="text-3xl font-black">
-                {card.value}
-              </h2>
-
-            </div>
-          );
-        })}
-
-      </section>
-
-      <section className="mt-8">
-
-        <div className="flex items-center gap-3 mb-4">
-
-          <CalendarCheck className="text-green-500" />
-
-          <h2 className="text-2xl font-black">
-            Quem treinou hoje
-          </h2>
-
+    <main className="min-h-screen bg-black text-white">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-zinc-800 p-5 flex items-center justify-between">
+        <div>
+          <p className="text-green-500 font-black">Nexora Fitness</p>
+          <h1 className="text-3xl font-black mt-1">Painel Admin</h1>
         </div>
 
-        <div className="space-y-4">
+        <button
+          onClick={() => setMenuAberto(true)}
+          className="bg-zinc-900 border border-zinc-800 rounded-2xl p-3"
+        >
+          <Menu />
+        </button>
+      </header>
 
-          {presencasHoje.length === 0 && (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center text-gray-400">
-              Nenhuma presença registrada hoje.
+      {menuAberto && (
+        <div className="fixed inset-0 z-50">
+          <button
+            onClick={() => setMenuAberto(false)}
+            className="absolute inset-0 bg-black/70"
+          />
+
+          <aside className="relative h-full w-[300px] bg-zinc-950 border-r border-zinc-800 p-5 overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-500 font-black">ADMIN</p>
+                <h2 className="text-2xl font-black mt-1">Menu</h2>
+              </div>
+
+              <button
+                onClick={() => setMenuAberto(false)}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-2"
+              >
+                <X />
+              </button>
             </div>
-          )}
 
-          {presencasHoje.map((presenca) => (
-            <div
-              key={presenca.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
-            >
+            <div className="mt-8 space-y-3">
+              {actions.map((action) => {
+                const Icon = action.icon;
 
-              <h3 className="text-xl font-black">
-                {presenca.aluno}
-              </h3>
-
-              <p className="text-green-500 font-bold mt-2">
-                {presenca.treino}
-              </p>
-
-              <p className="text-gray-500 text-sm mt-2">
-                ID: {presenca.aluno_id}
-              </p>
-
-              <p className="text-gray-500 text-sm mt-1">
-                Horário:{" "}
-                {new Date(
-                  presenca.created_at
-                ).toLocaleTimeString(
-                  "pt-BR",
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                )}
-              </p>
-
+                return (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    onClick={() => setMenuAberto(false)}
+                    className={`flex items-center gap-4 rounded-3xl p-4 font-bold transition ${
+                      action.destaque
+                        ? "bg-green-500 text-black"
+                        : "bg-zinc-900 border border-zinc-800 hover:border-green-500"
+                    }`}
+                  >
+                    <Icon />
+                    {action.title}
+                  </Link>
+                );
+              })}
             </div>
-          ))}
-
+          </aside>
         </div>
+      )}
 
-      </section>
-
-      <section className="mt-8">
-
-        <div className="flex items-center gap-3 mb-4">
-
-          <ChartColumn className="text-green-500" />
-
-          <h2 className="text-2xl font-black">
-            Ações rápidas
-          </h2>
-
-        </div>
-
-        <div className="grid gap-4">
-
-          {actions.map((action) => {
-            const Icon = action.icon;
+      <section className="p-6">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {cards.map((card) => {
+            const Icon = card.icon;
 
             return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className={`rounded-3xl p-5 font-bold flex items-center gap-3 transition ${
-                  action.destaque
-                    ? "bg-green-500 text-black hover:bg-green-400"
-                    : "bg-zinc-900 border border-zinc-800 hover:border-green-500"
-                }`}
+              <div
+                key={card.title}
+                className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
               >
+                <Icon className={card.color} />
 
-                <Icon />
+                <p className="text-gray-400 mt-4">{card.title}</p>
 
-                {action.title}
-
-              </Link>
+                <h2 className="text-3xl font-black">{card.value}</h2>
+              </div>
             );
           })}
+        </section>
 
-        </div>
+        <section className="mt-8">
+          <div className="flex items-center gap-3 mb-4">
+            <CalendarCheck className="text-green-500" />
+            <h2 className="text-2xl font-black">Quem treinou hoje</h2>
+          </div>
 
+          <div className="space-y-4">
+            {presencasHoje.length === 0 && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center text-gray-400">
+                Nenhuma presença registrada hoje.
+              </div>
+            )}
+
+            {presencasHoje.map((presenca) => (
+              <div
+                key={presenca.id}
+                className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+              >
+                <h3 className="text-xl font-black">{presenca.aluno}</h3>
+
+                <p className="text-green-500 font-bold mt-2">
+                  {presenca.treino}
+                </p>
+
+                <p className="text-gray-500 text-sm mt-2">
+                  ID: {presenca.aluno_id}
+                </p>
+
+                <p className="text-gray-500 text-sm mt-1">
+                  Horário:{" "}
+                  {new Date(presenca.created_at).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <div className="flex items-center gap-3 mb-4">
+            <ChartColumn className="text-green-500" />
+            <h2 className="text-2xl font-black">Ações rápidas</h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {actions.map((action) => {
+              const Icon = action.icon;
+
+              return (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className={`rounded-3xl p-5 font-bold flex items-center gap-3 transition ${
+                    action.destaque
+                      ? "bg-green-500 text-black hover:bg-green-400"
+                      : "bg-zinc-900 border border-zinc-800 hover:border-green-500"
+                  }`}
+                >
+                  <Icon />
+                  {action.title}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
       </section>
-
     </main>
   );
 }

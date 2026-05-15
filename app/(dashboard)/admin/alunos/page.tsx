@@ -1,29 +1,29 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Trash2, Users, BadgeCheck, User } from "lucide-react";
+import Link from "next/link";
+import { Users, User, BadgeCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 type Aluno = {
   id: number;
-  aluno_id: string;
   nome: string;
   email: string;
-  objetivo: string;
-  peso?: string;
-  foco?: string;
-  foto_url?: string;
+  aluno_id: string;
+  tipo: string;
 };
 
 export default function AlunosPage() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
 
-  async function buscarAlunos() {
+  async function carregar() {
     const { data, error } = await supabase
       .from("alunos")
       .select("*")
-      .order("id", { ascending: false });
+      .neq("tipo", "admin")
+      .order("nome", {
+        ascending: true,
+      });
 
     if (error) {
       alert(error.message);
@@ -33,41 +33,36 @@ export default function AlunosPage() {
     setAlunos(data || []);
   }
 
-  async function deletarAluno(id: number) {
-    const confirmar = confirm("Deseja realmente excluir este aluno?");
-    if (!confirmar) return;
-
-    const { error } = await supabase
-      .from("alunos")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    buscarAlunos();
-  }
-
   useEffect(() => {
-    buscarAlunos();
+    carregar();
   }, []);
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+
       <div className="flex items-center gap-3">
-        <Users className="text-green-500" size={32} />
+
+        <Users
+          className="text-yellow-400"
+          size={34}
+        />
 
         <div>
-          <h1 className="text-4xl font-black">Alunos</h1>
+
+          <h1 className="text-4xl font-black">
+            Alunos
+          </h1>
+
           <p className="text-gray-400 mt-1">
-            Lista de alunos cadastrados.
+            Gerencie seus alunos
           </p>
+
         </div>
+
       </div>
 
       <section className="mt-8 space-y-4">
+
         {alunos.length === 0 && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-center text-gray-400">
             Nenhum aluno cadastrado.
@@ -75,74 +70,53 @@ export default function AlunosPage() {
         )}
 
         {alunos.map((aluno) => (
-          <div
+          <Link
             key={aluno.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+            href={`/admin/alunos/${aluno.aluno_id}`}
+            className="block bg-zinc-900 border border-zinc-800 hover:border-yellow-400 transition rounded-3xl p-5"
           >
-            <div className="flex gap-4">
-              <div className="w-20 h-20 rounded-3xl bg-green-500 flex items-center justify-center overflow-hidden shrink-0">
-                {aluno.foto_url ? (
-                  <img
-                    src={aluno.foto_url}
-                    alt={aluno.nome}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="text-black" size={38} />
-                )}
+
+            <div className="flex items-center gap-4">
+
+              <div className="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center">
+                <User
+                  className="text-black"
+                  size={30}
+                />
               </div>
 
               <div className="flex-1">
-                <h2 className="text-xl font-black">{aluno.nome}</h2>
 
-                <div className="mt-2 inline-flex items-center gap-2 bg-black border border-green-500/40 text-green-500 rounded-2xl px-3 py-2 font-black">
-                  <BadgeCheck size={16} />
-                  ID: {aluno.aluno_id || "sem ID"}
-                </div>
+                <h2 className="text-2xl font-black">
+                  {aluno.nome}
+                </h2>
 
-                <p className="text-gray-400 mt-3">{aluno.email}</p>
-
-                <p className="text-green-500 font-bold mt-2">
-                  {aluno.objetivo}
+                <p className="text-gray-400 mt-1">
+                  {aluno.email}
                 </p>
 
-                {aluno.peso && (
-                  <p className="text-gray-400 mt-2">
-                    Peso: {aluno.peso}
-                  </p>
-                )}
+                <div className="inline-flex items-center gap-2 mt-3 bg-black border border-yellow-400/30 rounded-2xl px-3 py-2">
 
-                {aluno.foco && (
-                  <p className="text-gray-400 mt-1">
-                    Foco: {aluno.foco}
-                  </p>
-                )}
+                  <BadgeCheck
+                    className="text-yellow-400"
+                    size={18}
+                  />
+
+                  <span className="font-black text-yellow-400">
+                    ID: {aluno.aluno_id}
+                  </span>
+
+                </div>
+
               </div>
 
-              <button
-                onClick={() => deletarAluno(aluno.id)}
-                className="bg-red-500/10 hover:bg-red-500/20 transition p-3 rounded-2xl h-fit"
-              >
-                <Trash2 className="text-red-500" />
-              </button>
             </div>
 
-            <Link
-              href={`/admin/alunos/${aluno.aluno_id}`}
-              className="block mt-5 bg-green-500 hover:bg-green-400 transition text-black text-center font-black rounded-2xl p-4"
-            >
-              Ver evolução
-            </Link>
-
-            <Link
-              href={`/admin/alunos/editar/${aluno.aluno_id}`}
-              className="block mt-3 bg-zinc-800 hover:border-green-500 border border-zinc-700 transition text-white text-center font-black rounded-2xl p-4"
-            >
-              Editar aluno
-            </Link>
-          </div>
+          </Link>
         ))}
+
       </section>
+
     </main>
   );
 }

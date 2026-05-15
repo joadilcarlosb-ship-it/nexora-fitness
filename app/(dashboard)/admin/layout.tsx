@@ -10,38 +10,30 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    verificarAdmin();
+    verificar();
   }, []);
 
-  async function verificarAdmin() {
-    const { data: authData } =
-      await supabase.auth.getUser();
-
+  async function verificar() {
+    const { data: authData } = await supabase.auth.getUser();
     const user = authData.user;
 
     if (!user?.email) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
 
-    const { data: aluno } =
-      await supabase
-        .from("alunos")
-        .select("*")
-        .eq("email", user.email)
-        .single();
+    const { data: admin } = await supabase
+      .from("alunos")
+      .select("tipo")
+      .eq("email", user.email)
+      .eq("tipo", "admin")
+      .maybeSingle();
 
-    if (!aluno) {
-      router.push("/login");
-      return;
-    }
-
-    if (aluno.tipo !== "admin") {
-      router.push("/aluno");
+    if (!admin) {
+      router.replace("/aluno");
       return;
     }
 
@@ -52,7 +44,7 @@ export default function AdminLayout({
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <p className="text-green-500 font-black text-2xl">
-          Carregando painel...
+          Carregando admin...
         </p>
       </main>
     );

@@ -13,31 +13,31 @@ export default function AlunoLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    verificarAluno();
+    verificar();
   }, []);
 
-  async function verificarAluno() {
+  async function verificar() {
     const { data: authData } = await supabase.auth.getUser();
     const user = authData.user;
 
     if (!user?.email) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
 
     const { data: aluno } = await supabase
       .from("alunos")
-      .select("*")
+      .select("tipo")
       .eq("email", user.email)
-      .single();
+      .maybeSingle();
 
     if (!aluno) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
 
     if (aluno.tipo === "admin") {
-      router.push("/admin");
+      router.replace("/admin");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function AlunoLayout({
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <p className="text-green-500 font-black text-2xl">
-          Carregando...
+          Carregando aluno...
         </p>
       </main>
     );

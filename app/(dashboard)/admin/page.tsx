@@ -33,7 +33,6 @@ type Presenca = {
 
 export default function AdminPage() {
   const [menuAberto, setMenuAberto] = useState(false);
-
   const [alunosAtivos, setAlunosAtivos] = useState(0);
   const [treinosCadastrados, setTreinosCadastrados] = useState(0);
   const [receitaTotal, setReceitaTotal] = useState(0);
@@ -46,7 +45,8 @@ export default function AdminPage() {
 
     const { count: totalAlunos } = await supabase
       .from("alunos")
-      .select("*", { count: "exact", head: true });
+      .select("*", { count: "exact", head: true })
+      .neq("tipo", "admin");
 
     const { count: totalTreinos } = await supabase
       .from("treinos")
@@ -86,117 +86,27 @@ export default function AdminPage() {
   }, []);
 
   const cards = [
-    {
-      title: "Alunos ativos",
-      value: alunosAtivos,
-      icon: Users,
-      color: "text-green-500",
-    },
-    {
-      title: "Presenças hoje",
-      value: presencasHoje.length,
-      icon: CalendarCheck,
-      color: "text-green-500",
-    },
-    {
-      title: "Receita total",
-      value: `R$ ${receitaTotal}`,
-      icon: Wallet,
-      color: "text-green-500",
-    },
-    {
-      title: "Receita online",
-      value: `R$ ${receitaOnline}`,
-      icon: Wallet,
-      color: "text-green-500",
-    },
-    {
-      title: "Pagamentos atrasados",
-      value: pagamentosAtrasados,
-      icon: AlertTriangle,
-      color: "text-yellow-500",
-    },
-    {
-      title: "Treinos cadastrados",
-      value: treinosCadastrados,
-      icon: Dumbbell,
-      color: "text-green-500",
-    },
+    { title: "Alunos ativos", value: alunosAtivos, icon: Users, color: "text-green-500" },
+    { title: "Presenças hoje", value: presencasHoje.length, icon: CalendarCheck, color: "text-green-500" },
+    { title: "Receita total", value: `R$ ${receitaTotal}`, icon: Wallet, color: "text-green-500" },
+    { title: "Receita online", value: `R$ ${receitaOnline}`, icon: Wallet, color: "text-green-500" },
+    { title: "Pagamentos atrasados", value: pagamentosAtrasados, icon: AlertTriangle, color: "text-yellow-500" },
+    { title: "Treinos cadastrados", value: treinosCadastrados, icon: Dumbbell, color: "text-green-500" },
   ];
 
   const actions = [
-    {
-      title: "Cadastrar aluno",
-      href: "/admin/cadastrar-aluno",
-      icon: UserPlus,
-      destaque: true,
-    },
-    {
-      title: "Ver alunos",
-      href: "/admin/alunos",
-      icon: Users,
-      destaque: false,
-    },
-    {
-      title: "Criar treino",
-      href: "/admin/criar-treino",
-      icon: Dumbbell,
-      destaque: false,
-    },
-    {
-      title: "Ver treinos",
-      href: "/admin/ver-treinos",
-      icon: Dumbbell,
-      destaque: false,
-    },
-    {
-      title: "Treinos concluídos",
-      href: "/admin/treinos-concluidos",
-      icon: CheckCircle,
-      destaque: false,
-    },
-    {
-      title: "Presenças",
-      href: "/admin/presencas",
-      icon: CalendarCheck,
-      destaque: false,
-    },
-    {
-      title: "Ranking",
-      href: "/admin/ranking",
-      icon: Trophy,
-      destaque: false,
-    },
-    {
-      title: "Evolução física",
-      href: "/admin/evolucao",
-      icon: ChartColumn,
-      destaque: false,
-    },
-    {
-      title: "Antes e Depois",
-      href: "/admin/evolucao/fotos",
-      icon: Camera,
-      destaque: false,
-    },
-    {
-      title: "Chat alunos",
-      href: "/admin/chat",
-      icon: MessageCircle,
-      destaque: false,
-    },
-    {
-      title: "Planos",
-      href: "/admin/planos",
-      icon: Crown,
-      destaque: false,
-    },
-    {
-      title: "Financeiro",
-      href: "/admin/financeiro",
-      icon: Wallet,
-      destaque: false,
-    },
+    { title: "Cadastrar aluno", href: "/admin/cadastrar-aluno", icon: UserPlus, destaque: true },
+    { title: "Ver alunos", href: "/admin/alunos", icon: Users, destaque: false },
+    { title: "Criar treino", href: "/admin/criar-treino", icon: Dumbbell, destaque: false },
+    { title: "Ver treinos", href: "/admin/ver-treinos", icon: Dumbbell, destaque: false },
+    { title: "Treinos concluídos", href: "/admin/treinos-concluidos", icon: CheckCircle, destaque: false },
+    { title: "Presenças", href: "/admin/presencas", icon: CalendarCheck, destaque: false },
+    { title: "Ranking", href: "/admin/ranking", icon: Trophy, destaque: false },
+    { title: "Evolução física", href: "/admin/evolucao", icon: ChartColumn, destaque: false },
+    { title: "Antes e Depois", href: "/admin/evolucao/fotos", icon: Camera, destaque: false },
+    { title: "Chat alunos", href: "/admin/chat", icon: MessageCircle, destaque: false },
+    { title: "Planos", href: "/admin/planos", icon: Crown, destaque: false },
+    { title: "Financeiro", href: "/admin/financeiro", icon: Wallet, destaque: false },
   ];
 
   return (
@@ -204,7 +114,7 @@ export default function AdminPage() {
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-zinc-800 p-5 flex items-center justify-between">
         <div>
           <p className="text-green-500 font-black">Nexora Fitness</p>
-          <h1 className="text-3xl font-black mt-1">Painel Admin</h1>
+          <h1 className="text-3xl font-black mt-1">Dashboard</h1>
         </div>
 
         <button
@@ -319,34 +229,6 @@ export default function AdminPage() {
                 </p>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="mt-8">
-          <div className="flex items-center gap-3 mb-4">
-            <ChartColumn className="text-green-500" />
-            <h2 className="text-2xl font-black">Ações rápidas</h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {actions.map((action) => {
-              const Icon = action.icon;
-
-              return (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className={`rounded-3xl p-5 font-bold flex items-center gap-3 transition ${
-                    action.destaque
-                      ? "bg-green-500 text-black hover:bg-green-400"
-                      : "bg-zinc-900 border border-zinc-800 hover:border-green-500"
-                  }`}
-                >
-                  <Icon />
-                  {action.title}
-                </Link>
-              );
-            })}
           </div>
         </section>
       </section>

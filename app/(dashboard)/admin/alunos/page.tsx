@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, User, BadgeCheck, Pencil, ChartColumn } from "lucide-react";
+import { Users, User, BadgeCheck, Pencil } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { supabase } from "@/lib/supabase";
 
@@ -11,7 +11,7 @@ type Aluno = {
   nome: string;
   email: string;
   aluno_id: string;
-  tipo: string | null;
+  tipo: string;
   foto_url?: string;
 };
 
@@ -77,12 +77,10 @@ export default function AdminAlunosPage() {
 
               <div className="flex-1">
                 <h2 className="text-2xl font-black">{aluno.nome}</h2>
-
                 <p className="text-gray-400 mt-1">{aluno.email}</p>
 
                 <div className="inline-flex items-center gap-2 mt-3 bg-black border border-yellow-400/30 rounded-2xl px-3 py-2">
                   <BadgeCheck className="text-yellow-400" size={18} />
-
                   <span className="font-black text-yellow-400">
                     ID: {aluno.aluno_id}
                   </span>
@@ -90,23 +88,13 @@ export default function AdminAlunosPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-5">
-              <Link
-                href={`/admin/alunos/${aluno.aluno_id}`}
-                className="bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-2xl p-4 flex items-center justify-center gap-2"
-              >
-                <ChartColumn size={18} />
-                Evolução
-              </Link>
-
-              <Link
-                href={`/admin/alunos/editar/${aluno.aluno_id}`}
-                className="bg-black border border-zinc-800 hover:border-yellow-400 text-white font-black rounded-2xl p-4 flex items-center justify-center gap-2"
-              >
-                <Pencil size={18} />
-                Editar
-              </Link>
-            </div>
+            <Link
+              href={`/admin/alunos/editar/${aluno.aluno_id}`}
+              className="mt-5 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-2xl p-4 flex items-center justify-center gap-2"
+            >
+              <Pencil size={18} />
+              Editar aluno
+            </Link>
           </div>
         ))}
       </section>

@@ -38,9 +38,10 @@ export default function AlunosPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white p-6">
-      <BackButton />
-      <div className="flex items-center gap-3">
+    <main className="min-h-screen bg-black text-white p-6"> 
+     <BackButton />
+      
+     <div className="flex items-center gap-3">
 
         <Users
           className="text-yellow-400"

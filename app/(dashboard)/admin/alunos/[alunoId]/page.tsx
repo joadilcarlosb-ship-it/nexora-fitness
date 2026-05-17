@@ -2,156 +2,143 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+
 import {
   User,
+  Mail,
   BadgeCheck,
-  Weight,
-  Ruler,
-  Target,
-  ChartColumn,
 } from "lucide-react";
+
+import BackButton from "@/components/BackButton";
+
 import { supabase } from "@/lib/supabase";
 
 type Aluno = {
+  id: number;
   nome: string;
   email: string;
   aluno_id: string;
-  objetivo: string;
-  peso: string;
-  medidas: string;
-  foco: string;
+  tipo: string;
 };
 
-type Evolucao = {
-  id: number;
-  peso: string;
-  observacao: string;
-  created_at: string;
-};
-
-export default function EvolucaoAlunoAdminPage() {
+export default function VerAlunoPage() {
   const params = useParams();
-  const alunoId = params.alunoId as string;
 
-  const [aluno, setAluno] = useState<Aluno | null>(null);
-  const [historico, setHistorico] = useState<Evolucao[]>([]);
+  const [aluno, setAluno] =
+    useState<Aluno | null>(null);
 
-  async function buscarDados() {
-    const { data: alunoData, error } = await supabase
-      .from("alunos")
-      .select("*")
-      .eq("aluno_id", alunoId)
-      .single();
+  async function carregar() {
+    const alunoId =
+      params.alunoId;
+
+    const { data, error } =
+      await supabase
+        .from("alunos")
+        .select("*")
+        .eq(
+          "aluno_id",
+          alunoId
+        )
+        .single();
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    const { data: evolucaoData } = await supabase
-      .from("evolucao")
-      .select("*")
-      .eq("aluno_id", alunoId)
-      .order("created_at", { ascending: false });
-
-    setAluno(alunoData);
-    setHistorico(evolucaoData || []);
+    setAluno(data);
   }
 
   useEffect(() => {
-    buscarDados();
+    carregar();
   }, []);
 
   if (!aluno) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-green-500 font-black">Carregando...</p>
+        Carregando...
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
-      <div className="flex items-center gap-3">
-        <User className="text-green-500" size={32} />
+
+      <BackButton />
+
+      <div className="flex items-center gap-4">
+
+        <div className="w-24 h-24 rounded-full bg-yellow-400 flex items-center justify-center">
+
+          <User
+            className="text-black"
+            size={42}
+          />
+
+        </div>
 
         <div>
-          <h1 className="text-4xl font-black">{aluno.nome}</h1>
-          <p className="text-gray-400 mt-1">{aluno.email}</p>
-        </div>
-      </div>
 
-      <div className="mt-5 inline-flex items-center gap-2 bg-zinc-900 border border-green-500/40 text-green-500 rounded-2xl px-4 py-3 font-black">
-        <BadgeCheck size={18} />
-        ID: {aluno.aluno_id}
-      </div>
+          <h1 className="text-4xl font-black">
+            {aluno.nome}
+          </h1>
 
-      <section className="grid gap-4 mt-8">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-          <Weight className="text-green-500" />
-          <p className="text-gray-400 mt-3">Peso inicial</p>
-          <h2 className="text-3xl font-black">
-            {aluno.peso || "Não informado"}
-          </h2>
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-          <Ruler className="text-green-500" />
-          <p className="text-gray-400 mt-3">Medidas iniciais</p>
-          <p className="text-white mt-2 whitespace-pre-wrap">
-            {aluno.medidas || "Não informado"}
-          </p>
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-          <Target className="text-green-500" />
-          <p className="text-gray-400 mt-3">Objetivo</p>
-          <h2 className="text-2xl font-black">
-            {aluno.objetivo || "Não informado"}
-          </h2>
           <p className="text-gray-400 mt-2">
-            Foco: {aluno.foco || "Não informado"}
+            Perfil do aluno
           </p>
+
         </div>
+
+      </div>
+
+      <section className="mt-8 space-y-4">
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+
+          <div className="flex items-center gap-3">
+
+            <Mail className="text-yellow-400" />
+
+            <div>
+
+              <p className="text-gray-400 text-sm">
+                E-mail
+              </p>
+
+              <h2 className="font-black text-lg mt-1">
+                {aluno.email}
+              </h2>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+
+          <div className="flex items-center gap-3">
+
+            <BadgeCheck className="text-yellow-400" />
+
+            <div>
+
+              <p className="text-gray-400 text-sm">
+                ID do aluno
+              </p>
+
+              <h2 className="font-black text-lg mt-1">
+                {aluno.aluno_id}
+              </h2>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </section>
 
-      <section className="mt-8">
-        <div className="flex items-center gap-3 mb-4">
-          <ChartColumn className="text-green-500" />
-          <h2 className="text-2xl font-black">Histórico de evolução</h2>
-        </div>
-
-        <div className="space-y-4">
-          {historico.length === 0 && (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center text-gray-400">
-              Nenhuma evolução registrada.
-            </div>
-          )}
-
-          {historico.map((item) => (
-            <div
-              key={item.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
-            >
-              <div className="flex items-center gap-3">
-                <Weight className="text-green-500" />
-
-                <div>
-                  <h3 className="text-2xl font-black">{item.peso}</h3>
-
-                  <p className="text-gray-500 text-sm">
-                    {new Date(item.created_at).toLocaleDateString("pt-BR")}
-                  </p>
-                </div>
-              </div>
-
-              {item.observacao && (
-                <p className="text-gray-300 mt-4">{item.observacao}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
     </main>
   );
 }

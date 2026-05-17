@@ -3,41 +3,17 @@
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type Props = {
-  texto?: string;
-};
-
-export default function BackButton({
-  texto = "Voltar",
-}: Props) {
+export default function BackButton() {
   const router = useRouter();
 
   return (
     <button
       onClick={() => router.back()}
-      className="
-        mb-6
-        inline-flex
-        items-center
-        gap-2
-        bg-zinc-900
-        border
-        border-zinc-800
-        hover:border-yellow-400
-        hover:bg-zinc-800
-        transition-all
-        duration-200
-        text-yellow-400
-        font-black
-        rounded-2xl
-        px-5
-        py-3
-        shadow-lg
-      "
+      className="mb-6 flex items-center gap-2 bg-zinc-900 border border-zinc-800 hover:border-yellow-400 transition rounded-2xl px-5 py-3 text-yellow-400 font-black text-lg"
     >
-      <ArrowLeft size={20} />
+      <ArrowLeft size={22} />
 
-      <span>{texto}</span>
+      Voltar
     </button>
   );
 }

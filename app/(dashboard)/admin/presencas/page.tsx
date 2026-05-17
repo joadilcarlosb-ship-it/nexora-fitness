@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CalendarCheck, BadgeCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 type Presenca = {
   id: number;
   aluno: string;
@@ -36,6 +36,7 @@ export default function PresencasPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <CalendarCheck className="text-green-500" size={32} />
 

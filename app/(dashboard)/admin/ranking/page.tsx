@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Trophy, Medal, BadgeCheck, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 type Presenca = {
   aluno: string;
   aluno_id: string;
@@ -77,6 +77,7 @@ export default function RankingPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <Trophy className="text-yellow-500" size={36} />
 

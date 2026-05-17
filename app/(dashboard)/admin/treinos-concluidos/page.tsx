@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, BadgeCheck, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 type TreinoConcluido = {
   id: number;
   aluno: string;
@@ -53,6 +53,7 @@ export default function TreinosConcluidosPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <CheckCircle className="text-green-500" size={32} />
 

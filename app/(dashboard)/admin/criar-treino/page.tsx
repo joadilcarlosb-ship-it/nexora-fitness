@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, Dumbbell } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 const diasDisponiveis = [
   "Segunda-feira",
   "Terça-feira",
@@ -251,6 +251,7 @@ export default function CriarTreinoPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         {modo === "semana" ? (
           <CalendarDays className="text-green-500" size={32} />

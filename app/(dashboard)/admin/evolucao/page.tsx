@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChartColumn, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import BackButton from "@/components/BackButton";
 
 type Aluno = {
   nome: string;
@@ -84,6 +85,7 @@ export default function EvolucaoAdminPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <ChartColumn className="text-green-500" size={32} />
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Crown, Trash2, BadgeCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 const opcoesPlanos = [
   { nome: "Mensal Livre", valor: 145, meses: 1 },
   { nome: "3x por semana", valor: 90, meses: 1 },
@@ -113,6 +113,8 @@ export default function PlanosAdminPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
+      
       <div className="flex items-center gap-3">
         <Crown className="text-green-500" size={32} />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dumbbell, Lock, Mail, Sparkles, ArrowRight } from "lucide-react";
+import { Dumbbell, Lock, Mail, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -43,45 +43,40 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6 overflow-hidden relative">
-      <div className="absolute -top-32 -right-24 w-80 h-80 bg-yellow-400/20 blur-3xl rounded-full" />
-      <div className="absolute -bottom-32 -left-24 w-80 h-80 bg-yellow-400/10 blur-3xl rounded-full" />
+    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute -top-40 -right-32 w-[360px] h-[360px] bg-yellow-400/20 blur-3xl rounded-full" />
+      <div className="absolute -bottom-40 -left-32 w-[360px] h-[360px] bg-yellow-400/10 blur-3xl rounded-full" />
 
-      <section className="relative w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-[36px] p-7 shadow-2xl">
+      <section className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-[40px] p-8 shadow-2xl">
         <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-[30px] bg-yellow-400 flex items-center justify-center shadow-xl shadow-yellow-400/20">
-            <Dumbbell className="text-black" size={48} />
+          <div className="w-28 h-28 rounded-[34px] bg-yellow-400 flex items-center justify-center shadow-xl shadow-yellow-400/20">
+            <Dumbbell className="text-black" size={56} />
           </div>
         </div>
 
-        <div className="text-center mt-6">
-          <div className="inline-flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 rounded-full px-4 py-2 font-black text-sm">
-            <Sparkles size={16} />
-            Academia inteligente
-          </div>
+        <div className="text-center mt-7">
+          <h1 className="text-6xl font-black">Nexora</h1>
 
-          <h1 className="text-5xl font-black mt-5">Nexora</h1>
-
-          <p className="text-gray-400 mt-2">
-            Entre com o acesso criado pela academia.
+          <p className="text-gray-400 mt-3 text-lg">
+            Acesse sua conta da academia.
           </p>
         </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="bg-black border border-zinc-800 rounded-2xl p-4 flex items-center gap-3 focus-within:border-yellow-400 transition">
-            <Mail className="text-yellow-400" size={22} />
+        <div className="mt-10 space-y-5">
+          <div className="bg-black border border-zinc-800 rounded-3xl p-5 flex items-center gap-3 focus-within:border-yellow-400 transition">
+            <Mail className="text-yellow-400" size={24} />
 
             <input
               type="email"
               placeholder="E-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-transparent outline-none flex-1 text-white placeholder:text-gray-500"
+              className="bg-transparent outline-none flex-1 text-white placeholder:text-gray-500 text-lg"
             />
           </div>
 
-          <div className="bg-black border border-zinc-800 rounded-2xl p-4 flex items-center gap-3 focus-within:border-yellow-400 transition">
-            <Lock className="text-yellow-400" size={22} />
+          <div className="bg-black border border-zinc-800 rounded-3xl p-5 flex items-center gap-3 focus-within:border-yellow-400 transition">
+            <Lock className="text-yellow-400" size={24} />
 
             <input
               type="password"
@@ -91,25 +86,23 @@ export default function LoginPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") entrar();
               }}
-              className="bg-transparent outline-none flex-1 text-white placeholder:text-gray-500"
+              className="bg-transparent outline-none flex-1 text-white placeholder:text-gray-500 text-lg"
             />
           </div>
 
           <button
             onClick={entrar}
             disabled={carregando}
-            className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:opacity-60 transition text-black font-black rounded-2xl p-4 text-lg flex items-center justify-center gap-2"
+            className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:opacity-60 transition text-black font-black rounded-3xl p-5 text-xl flex items-center justify-center gap-2"
           >
             {carregando ? "Entrando..." : "Entrar"}
-            {!carregando && <ArrowRight size={22} />}
+            {!carregando && <ArrowRight size={24} />}
           </button>
         </div>
 
-        <div className="mt-6 bg-black border border-zinc-800 rounded-2xl p-4 text-center">
-          <p className="text-gray-500 text-sm">
-            Aluno não cria conta. O administrador cadastra o acesso.
-          </p>
-        </div>
+        <p className="text-center text-gray-500 text-sm mt-7">
+          O acesso é criado pela administração.
+        </p>
       </section>
     </main>
   );

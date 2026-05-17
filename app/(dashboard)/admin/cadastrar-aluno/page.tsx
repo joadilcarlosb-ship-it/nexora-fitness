@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Camera } from "lucide-react";
+import { UserPlus, Save } from "lucide-react";
+import BackButton from "@/components/BackButton";
 import { supabase } from "@/lib/supabase";
 
 export default function CadastrarAlunoPage() {
@@ -10,64 +11,23 @@ export default function CadastrarAlunoPage() {
   const [senha, setSenha] = useState("");
   const [objetivo, setObjetivo] = useState("");
   const [peso, setPeso] = useState("");
-  const [medidas, setMedidas] = useState("");
   const [foco, setFoco] = useState("");
-  const [foto, setFoto] = useState<File | null>(null);
 
-  async function enviarFoto(alunoId: string) {
-    if (!foto) return "";
-
-    const extensao = foto.name.split(".").pop();
-    const caminho = `${alunoId}.${extensao}`;
-
-    const { error } = await supabase.storage
-      .from("alunos")
-      .upload(caminho, foto, {
-        upsert: true,
-      });
-
-    if (error) {
-      alert(error.message);
-      return "";
-    }
-
-    const { data } = supabase.storage
-      .from("alunos")
-      .getPublicUrl(caminho);
-
-    return data.publicUrl;
+  function gerarIdAluno() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async function cadastrarAluno() {
-    if (
-      !nome ||
-      !email ||
-      !senha ||
-      !objetivo ||
-      !peso ||
-      !medidas ||
-      !foco
-    ) {
-      alert("Preencha todos os campos.");
+    if (!nome || !email || !senha) {
+      alert("Preencha nome, email e senha.");
       return;
     }
 
-    const alunoId = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
-
-    const fotoUrl = await enviarFoto(alunoId);
+    const alunoId = gerarIdAluno();
 
     const { error: authError } = await supabase.auth.signUp({
       email,
       password: senha,
-      options: {
-        data: {
-          nome,
-          tipo: "aluno",
-          aluno_id: alunoId,
-        },
-      },
     });
 
     if (authError) {
@@ -78,12 +38,12 @@ export default function CadastrarAlunoPage() {
     const { error } = await supabase.from("alunos").insert({
       nome,
       email,
-      objetivo,
       aluno_id: alunoId,
+      tipo: "aluno",
+      objetivo,
       peso,
-      medidas,
       foco,
-      foto_url: fotoUrl,
+      streak: 0,
     });
 
     if (error) {
@@ -91,124 +51,215 @@ export default function CadastrarAlunoPage() {
       return;
     }
 
-    alert(`Aluno criado com sucesso!\nID do aluno: ${alunoId}`);
+    alert(`Aluno cadastrado! ID: ${alunoId}`);
 
     setNome("");
     setEmail("");
     setSenha("");
     setObjetivo("");
     setPeso("");
-    setMedidas("");
     setFoco("");
-    setFoto(null);
   }
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
+
       <div className="flex items-center gap-3">
-        <UserPlus className="text-green-500" size={32} />
+        <UserPlus className="text-yellow-400" size={34} />
 
         <div>
           <h1 className="text-4xl font-black">Cadastrar aluno</h1>
           <p className="text-gray-400 mt-1">
-            Crie o aluno, login e avaliação inicial.
+            Crie o acesso do aluno com email e senha.
           </p>
         </div>
       </div>
 
-      <section className="mt-10 space-y-5">
-        <label className="block bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-center cursor-pointer hover:border-green-500 transition">
-          <Camera className="text-green-500 mx-auto" size={36} />
-
-          <p className="font-black mt-3">
-            {foto ? foto.name : "Adicionar foto do rosto"}
-          </p>
-
-          <p className="text-gray-500 text-sm mt-1">
-            Ajuda o admin a identificar o aluno.
-          </p>
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              setFoto(e.target.files?.[0] || null)
-            }
-            className="hidden"
-          />
-        </label>
-
+      <section className="mt-8 space-y-4">
         <input
-          type="text"
-          placeholder="Nome completo"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
+          placeholder="Nome completo"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
         />
 
         <input
-          type="email"
-          placeholder="E-mail do aluno"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
+          placeholder="E-mail do aluno"
+          type="email"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
         />
 
         <input
-          type="text"
-          placeholder="Senha provisória"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
+          placeholder="Senha criada pelo admin"
+          type="password"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
         />
 
         <input
-          type="text"
-          placeholder="Peso atual. Ex: 72kg"
-          value={peso}
-          onChange={(e) => setPeso(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-        />
-
-        <textarea
-          placeholder="Medidas. Ex: braço 36cm, peito 98cm, cintura 82cm"
-          value={medidas}
-          onChange={(e) => setMedidas(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500 min-h-[120px]"
-        />
-
-        <select
           value={objetivo}
           onChange={(e) => setObjetivo(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-        >
-          <option value="">Objetivo principal</option>
-          <option value="Hipertrofia">Hipertrofia</option>
-          <option value="Emagrecimento">Emagrecimento</option>
-          <option value="Condicionamento">Condicionamento</option>
-          <option value="Força">Força</option>
-          <option value="Saúde">Saúde</option>
-        </select>
+          placeholder="Objetivo. Ex: ganhar massa"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
 
-        <select
+        <input
+          value={peso}
+          onChange={(e) => setPeso(e.target.value)}
+          placeholder="Peso. Ex: 75kg"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
           value={foco}
           onChange={(e) => setFoco(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-        >
-          <option value="">Foco do aluno</option>
-          <option value="Ganhar massa">Ganhar massa</option>
-          <option value="Perder gordura">Perder gordura</option>
-          <option value="Definir corpo">Definir corpo</option>
-          <option value="Melhorar resistência">
-            Melhorar resistência
-          </option>
-        </select>
+          placeholder="Foco. Ex: hipertrofia"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
 
         <button
           onClick={cadastrarAluno}
-          className="w-full bg-green-500 hover:bg-green-400 transition text-black font-black rounded-2xl p-4"
+          className="w-full bg-yellow-400 hover:bg-yellow-300 transition text-black font-black rounded-2xl p-4 flex items-center justify-center gap-2"
         >
-          Criar aluno e login
+          <Save size={20} />
+          Cadastrar aluno
+        </button>
+      </section>
+    </main>
+  );
+}"use client";
+
+import { useState } from "react";
+import { UserPlus, Save } from "lucide-react";
+import BackButton from "@/components/BackButton";
+import { supabase } from "@/lib/supabase";
+
+export default function CadastrarAlunoPage() {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [objetivo, setObjetivo] = useState("");
+  const [peso, setPeso] = useState("");
+  const [foco, setFoco] = useState("");
+
+  function gerarIdAluno() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  async function cadastrarAluno() {
+    if (!nome || !email || !senha) {
+      alert("Preencha nome, email e senha.");
+      return;
+    }
+
+    const alunoId = gerarIdAluno();
+
+    const { error: authError } = await supabase.auth.signUp({
+      email,
+      password: senha,
+    });
+
+    if (authError) {
+      alert(authError.message);
+      return;
+    }
+
+    const { error } = await supabase.from("alunos").insert({
+      nome,
+      email,
+      aluno_id: alunoId,
+      tipo: "aluno",
+      objetivo,
+      peso,
+      foco,
+      streak: 0,
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert(`Aluno cadastrado! ID: ${alunoId}`);
+
+    setNome("");
+    setEmail("");
+    setSenha("");
+    setObjetivo("");
+    setPeso("");
+    setFoco("");
+  }
+
+  return (
+    <main className="min-h-screen bg-black text-white p-6">
+      <BackButton />
+
+      <div className="flex items-center gap-3">
+        <UserPlus className="text-yellow-400" size={34} />
+
+        <div>
+          <h1 className="text-4xl font-black">Cadastrar aluno</h1>
+          <p className="text-gray-400 mt-1">
+            Crie o acesso do aluno com email e senha.
+          </p>
+        </div>
+      </div>
+
+      <section className="mt-8 space-y-4">
+        <input
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          placeholder="Nome completo"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="E-mail do aluno"
+          type="email"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          placeholder="Senha criada pelo admin"
+          type="password"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
+          value={objetivo}
+          onChange={(e) => setObjetivo(e.target.value)}
+          placeholder="Objetivo. Ex: ganhar massa"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
+          value={peso}
+          onChange={(e) => setPeso(e.target.value)}
+          placeholder="Peso. Ex: 75kg"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <input
+          value={foco}
+          onChange={(e) => setFoco(e.target.value)}
+          placeholder="Foco. Ex: hipertrofia"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        />
+
+        <button
+          onClick={cadastrarAluno}
+          className="w-full bg-yellow-400 hover:bg-yellow-300 transition text-black font-black rounded-2xl p-4 flex items-center justify-center gap-2"
+        >
+          <Save size={20} />
+          Cadastrar aluno
         </button>
       </section>
     </main>

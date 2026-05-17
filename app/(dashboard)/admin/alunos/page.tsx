@@ -22,7 +22,7 @@ export default function AdminAlunosPage() {
     const { data, error } = await supabase
       .from("alunos")
       .select("*")
-      .or("tipo.is.null,tipo.eq.aluno")
+      .eq("tipo", "aluno")
       .order("nome", { ascending: true });
 
     if (error) {

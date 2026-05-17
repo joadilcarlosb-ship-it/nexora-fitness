@@ -1,13 +1,7 @@
-import ProtectedRoute from "@/components/ProtectedRoute";
-
-export default function AlunoLayout({
+export default function AdminAlunosLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <ProtectedRoute tipoPermitido="aluno">
-      {children}
-    </ProtectedRoute>
-  );
+  return <>{children}</>;
 }

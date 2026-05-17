@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { CalendarDays, Dumbbell } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import BackButton from "@/components/BackButton";
+import { supabase } from "@/lib/supabase";
+
 const diasDisponiveis = [
   "Segunda-feira",
   "Terça-feira",
@@ -87,15 +88,11 @@ export default function CriarTreinoPage() {
   const [treinoEscolhido, setTreinoEscolhido] = useState("");
 
   async function buscarAlunos() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("alunos")
       .select("id, nome, aluno_id")
+      .eq("tipo", "aluno")
       .order("nome", { ascending: true });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
 
     setAlunos(data || []);
   }
@@ -142,7 +139,7 @@ export default function CriarTreinoPage() {
     return data.toISOString().split("T")[0];
   }
 
-  async function enviarNotificacao(
+  async function notificarAluno(
     alunoNome: string,
     alunoCodigo: string,
     titulo: string,
@@ -189,14 +186,14 @@ export default function CriarTreinoPage() {
       return;
     }
 
-    await enviarNotificacao(
+    await notificarAluno(
       aluno.nome,
       aluno.aluno_id,
-      "Treino semanal liberado 🔥",
-      "Sua semana de treino foi organizada e já está disponível no app."
+      "Semana de treino liberada 🔥",
+      "Sua programação semanal já está disponível."
     );
 
-    alert("Treino da semana enviado para o aluno!");
+    alert("Treino da semana enviado e notificação criada!");
 
     setAlunoId("");
     setDiasSelecionados([]);
@@ -205,7 +202,6 @@ export default function CriarTreinoPage() {
 
   async function enviarTreinoDia() {
     const aluno = pegarAlunoSelecionado();
-
     const treino = treinosProntos.find((item) => item.nome === treinoEscolhido);
 
     if (!aluno || !diaSemana || !dataTreino || !treino) {
@@ -227,14 +223,14 @@ export default function CriarTreinoPage() {
       return;
     }
 
-    await enviarNotificacao(
+    await notificarAluno(
       aluno.nome,
       aluno.aluno_id,
       "Novo treino disponível 💪",
-      `Seu treino "${treino.nome}" foi liberado.`
+      `Seu treino "${treino.nome}" foi liberado pela academia.`
     );
 
-    alert("Treino do dia enviado para o aluno!");
+    alert("Treino enviado e notificação criada!");
 
     setAlunoId("");
     setDiaSemana("");
@@ -243,7 +239,9 @@ export default function CriarTreinoPage() {
   }
 
   const previewSemana =
-    modo === "semana" && diasSelecionados.length > 0 ? dividirFichaPorDias() : [];
+    modo === "semana" && diasSelecionados.length > 0
+      ? dividirFichaPorDias()
+      : [];
 
   const treinoPreview = treinosProntos.find(
     (item) => item.nome === treinoEscolhido
@@ -252,16 +250,16 @@ export default function CriarTreinoPage() {
   return (
     <main className="min-h-screen bg-black text-white p-6">
       <BackButton />
+
       <div className="flex items-center gap-3">
         {modo === "semana" ? (
-          <CalendarDays className="text-green-500" size={32} />
+          <CalendarDays className="text-yellow-400" size={32} />
         ) : (
-          <Dumbbell className="text-green-500" size={32} />
+          <Dumbbell className="text-yellow-400" size={32} />
         )}
 
         <div>
           <h1 className="text-4xl font-black">Criar treino</h1>
-
           <p className="text-gray-400 mt-1">
             Envie treino por dia ou organize a semana completa.
           </p>
@@ -273,7 +271,7 @@ export default function CriarTreinoPage() {
           onClick={() => setModo("semana")}
           className={`rounded-2xl p-4 font-black border ${
             modo === "semana"
-              ? "bg-green-500 text-black border-green-500"
+              ? "bg-yellow-400 text-black border-yellow-400"
               : "bg-zinc-900 border-zinc-800"
           }`}
         >
@@ -284,7 +282,7 @@ export default function CriarTreinoPage() {
           onClick={() => setModo("dia")}
           className={`rounded-2xl p-4 font-black border ${
             modo === "dia"
-              ? "bg-green-500 text-black border-green-500"
+              ? "bg-yellow-400 text-black border-yellow-400"
               : "bg-zinc-900 border-zinc-800"
           }`}
         >
@@ -293,68 +291,52 @@ export default function CriarTreinoPage() {
       </section>
 
       <section className="mt-8 space-y-5">
-        <div>
-          <label className="text-sm text-gray-400">Aluno</label>
+        <select
+          value={alunoId}
+          onChange={(e) => setAlunoId(e.target.value)}
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+        >
+          <option value="">Selecione o aluno</option>
 
-          <select
-            value={alunoId}
-            onChange={(e) => setAlunoId(e.target.value)}
-            className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-          >
-            <option value="">Selecione o aluno</option>
-
-            {alunos.map((aluno) => (
-              <option key={aluno.id} value={aluno.aluno_id}>
-                {aluno.nome} • ID {aluno.aluno_id}
-              </option>
-            ))}
-          </select>
-        </div>
+          {alunos.map((aluno) => (
+            <option key={aluno.id} value={aluno.aluno_id}>
+              {aluno.nome} • ID {aluno.aluno_id}
+            </option>
+          ))}
+        </select>
 
         {modo === "semana" && (
           <>
-            <div>
-              <label className="text-sm text-gray-400">
-                Data inicial da semana
-              </label>
+            <input
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+            />
 
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={(e) => setDataInicio(e.target.value)}
-                className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-              />
-            </div>
+            <div className="grid gap-3">
+              {diasDisponiveis.map((dia) => {
+                const ativo = diasSelecionados.includes(dia);
 
-            <div>
-              <label className="text-sm text-gray-400">
-                Dias que o aluno consegue vir
-              </label>
-
-              <div className="grid gap-3 mt-3">
-                {diasDisponiveis.map((dia) => {
-                  const ativo = diasSelecionados.includes(dia);
-
-                  return (
-                    <button
-                      key={dia}
-                      onClick={() => alternarDia(dia)}
-                      className={`rounded-2xl p-4 font-bold border transition ${
-                        ativo
-                          ? "bg-green-500 text-black border-green-500"
-                          : "bg-zinc-900 text-white border-zinc-800 hover:border-green-500"
-                      }`}
-                    >
-                      {dia}
-                    </button>
-                  );
-                })}
-              </div>
+                return (
+                  <button
+                    key={dia}
+                    onClick={() => alternarDia(dia)}
+                    className={`rounded-2xl p-4 font-bold border transition ${
+                      ativo
+                        ? "bg-yellow-400 text-black border-yellow-400"
+                        : "bg-zinc-900 text-white border-zinc-800 hover:border-yellow-400"
+                    }`}
+                  >
+                    {dia}
+                  </button>
+                );
+              })}
             </div>
 
             {previewSemana.length > 0 && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-                <h2 className="text-xl font-black text-green-500">
+                <h2 className="text-xl font-black text-yellow-400">
                   Prévia da semana
                 </h2>
 
@@ -365,7 +347,6 @@ export default function CriarTreinoPage() {
                       className="bg-black border border-zinc-800 rounded-2xl p-4"
                     >
                       <p className="font-black">{diasSelecionados[index]}</p>
-
                       <p className="text-gray-400 mt-1">
                         {grupos.join(" + ")}
                       </p>
@@ -377,7 +358,7 @@ export default function CriarTreinoPage() {
 
             <button
               onClick={enviarTreinoSemana}
-              className="w-full bg-green-500 hover:bg-green-400 transition text-black font-black rounded-2xl p-4"
+              className="w-full bg-yellow-400 hover:bg-yellow-300 transition text-black font-black rounded-2xl p-4"
             >
               Enviar semana completa
             </button>
@@ -386,56 +367,44 @@ export default function CriarTreinoPage() {
 
         {modo === "dia" && (
           <>
-            <div>
-              <label className="text-sm text-gray-400">Dia da semana</label>
+            <select
+              value={diaSemana}
+              onChange={(e) => setDiaSemana(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+            >
+              <option value="">Selecione o dia</option>
 
-              <select
-                value={diaSemana}
-                onChange={(e) => setDiaSemana(e.target.value)}
-                className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-              >
-                <option value="">Selecione</option>
+              {diasDisponiveis.map((dia) => (
+                <option key={dia} value={dia}>
+                  {dia}
+                </option>
+              ))}
+            </select>
 
-                {diasDisponiveis.map((dia) => (
-                  <option key={dia} value={dia}>
-                    {dia}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <input
+              type="date"
+              value={dataTreino}
+              onChange={(e) => setDataTreino(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+            />
 
-            <div>
-              <label className="text-sm text-gray-400">Data do treino</label>
+            <select
+              value={treinoEscolhido}
+              onChange={(e) => setTreinoEscolhido(e.target.value)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-yellow-400"
+            >
+              <option value="">Selecione um treino</option>
 
-              <input
-                type="date"
-                value={dataTreino}
-                onChange={(e) => setDataTreino(e.target.value)}
-                className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-gray-400">Treino pronto</label>
-
-              <select
-                value={treinoEscolhido}
-                onChange={(e) => setTreinoEscolhido(e.target.value)}
-                className="w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 outline-none focus:border-green-500"
-              >
-                <option value="">Selecione um treino</option>
-
-                {treinosProntos.map((treino) => (
-                  <option key={treino.nome} value={treino.nome}>
-                    {treino.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {treinosProntos.map((treino) => (
+                <option key={treino.nome} value={treino.nome}>
+                  {treino.nome}
+                </option>
+              ))}
+            </select>
 
             {treinoPreview && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-                <h2 className="text-xl font-black text-green-500">
+                <h2 className="text-xl font-black text-yellow-400">
                   {treinoPreview.nome}
                 </h2>
 
@@ -447,7 +416,7 @@ export default function CriarTreinoPage() {
 
             <button
               onClick={enviarTreinoDia}
-              className="w-full bg-green-500 hover:bg-green-400 transition text-black font-black rounded-2xl p-4"
+              className="w-full bg-yellow-400 hover:bg-yellow-300 transition text-black font-black rounded-2xl p-4"
             >
               Enviar treino do dia
             </button>

@@ -103,7 +103,7 @@ export default function AdminChatPage() {
       aluno: conversaAtual.aluno,
       aluno_id: conversaAtual.aluno_id,
       titulo: "Nova mensagem 💬",
-      mensagem: "A academia respondeu sua mensagem no chat.",
+      mensagem: "A academia respondeu você no chat.",
       visualizada: false,
     });
 
@@ -181,7 +181,9 @@ export default function AdminChatPage() {
                 }`}
               >
                 <p className="font-black">{conversa.aluno}</p>
-                <p className="text-sm opacity-70 mt-1">ID: {conversa.aluno_id}</p>
+                <p className="text-sm opacity-70 mt-1">
+                  ID: {conversa.aluno_id}
+                </p>
 
                 {conversa.naoLidas > 0 && (
                   <span className="absolute top-3 right-3 bg-yellow-400 text-black min-w-[24px] h-6 rounded-full flex items-center justify-center text-xs font-black px-2">
@@ -200,7 +202,9 @@ export default function AdminChatPage() {
                 <User className="text-yellow-400" />
 
                 <div>
-                  <h2 className="text-2xl font-black">{conversaAtual.aluno}</h2>
+                  <h2 className="text-2xl font-black">
+                    {conversaAtual.aluno}
+                  </h2>
                   <p className="text-gray-400 text-sm">
                     ID: {conversaAtual.aluno_id}
                   </p>

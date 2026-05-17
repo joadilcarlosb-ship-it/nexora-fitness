@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Send } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
-import BackButton from "@/components/BackButton";
 import { supabase } from "@/lib/supabase";
 
 type Mensagem = {
@@ -113,7 +112,6 @@ export default function ChatAlunoPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6 pb-36 flex flex-col">
-      <BackButton />
 
       <div className="flex items-center gap-3">
         <MessageCircle className="text-yellow-400" size={34} />

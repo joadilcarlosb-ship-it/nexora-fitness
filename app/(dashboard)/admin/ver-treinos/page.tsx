@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
-
+import BackButton from "@/components/BackButton";
 type Treino = {
   id: number;
   aluno: string;
@@ -100,8 +100,9 @@ export default function VerTreinosPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
-
-      <div className="flex items-center gap-3">
+     <BackButton />
+    
+     <div className="flex items-center gap-3">
 
         <Dumbbell
           className="text-green-500"

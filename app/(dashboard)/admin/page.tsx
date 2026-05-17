@@ -131,7 +131,7 @@ export default function AdminPage() {
             className="absolute inset-0 bg-black/70"
           />
 
-          <aside className="relative h-full w-[310px] bg-zinc-950 border-r border-zinc-800 p-5 overflow-y-auto">
+          <aside className="absolute right-0 top-0 h-full w-[310px] bg-zinc-950 border-l border-zinc-800 p-5 overflow-y-auto">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-yellow-400 font-black">ADMIN</p>
